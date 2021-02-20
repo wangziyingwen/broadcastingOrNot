@@ -173,8 +173,8 @@ for i in range(len(up_list)):
         f.write(contenthtml.content)
     htmlsize=os.path.getsize(htmlpath)
     print(str(i)+" 文件大小："+str(htmlsize))
-    on_list[up_list[i]][1]=on_list[up_list[i]][1]+15
-    if on_list[up_list[i]][1] > int(time_set):
+    on_list[up_list[i]][1]=on_list[up_list[i]][1]+10
+    if on_list[up_list[i]][1] >= int(time_set):
         on_list[up_list[i]][0] = 0
         on_list[up_list[i]][1] = 0
         #每隔一个time_set清空一次数据
