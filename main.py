@@ -5,7 +5,6 @@ import json,sys,random
 from base64 import b64encode
 from nacl import encoding, public
 
-
 url_header=os.getenv('URL_HEADER')
 gh_token=os.getenv('GH_TOKEN')
 tg_bot=os.getenv('TGBOT').split(',')
@@ -24,6 +23,25 @@ emailaddress=os.getenv('EMAIL')
 time_set=os.getenv('TIME_SET')
 htmlpath=sys.path[0]+r'/1.txt'
 up_list=focus_up.split(',')
+focus_up_add=os.getenv('FOCUS_UP_ADD').split(',')
+focus_up_de=os.getenv('FOCUS_UP_DE').split(',')
+if focus_up_add != '':
+    for i in range(len(focus_up_add)):
+        up_list.append(focus_up_add[i])
+        focus_up=focus_up+','+focus_up_add[i]
+        print('添加成功')
+if focus_up_de != '':
+    focus_up_1=''    
+    for i in range(len(focus_up_de)):
+        if focus_up_de[i] in up_list:
+            up_list.remove(focus_up_de[i])
+            print('删除成功')
+    for i in range(len(up_list)):
+        if i ==  len(up_list)-1:
+            focus_up_1=focus_up_1+up_list[i]
+        else:
+            focus_up_1=focus_up_1+up_list[i]+','
+    focus_up=focus_up_1                
 broadcasting_list=''
 broadcasting_list_4bot=''
 Auth=r'token '+gh_token
@@ -106,7 +124,7 @@ def createsecret(public_key,secret_value):
     encrypted = sealed_box.encrypt(secret_value.encode("utf-8"))
     return b64encode(encrypted).decode("utf-8")
 
-def setsecret(encrypted_value):
+def setsecret(encrypted_value,url):
     headers={
             'Accept': 'application/vnd.github.v3+json',
             'Authorization': Auth
@@ -117,7 +135,7 @@ def setsecret(encrypted_value):
          }
     #data_str=r'{"encrypted_value":"'+encrypted_value+r'",'+r'"key_id":"'+key_id+r'"}'
     for retry_ in range(4):
-        putstatus=req.put(puturl,headers=headers,data=json.dumps(data))
+        putstatus=req.put(url,headers=headers,data=json.dumps(data))
         if putstatus.status_code < 300:
             print(r'secret上传成功')
             break
@@ -125,6 +143,17 @@ def setsecret(encrypted_value):
             if retry_ == 3:
                 print(r'secret上传失败')        
     return putstatus
+
+def deSecret(url):
+    headers={
+            'Accept': 'application/vnd.github.v3+json',
+            'Authorization': Auth
+            }
+    for retry_ in range(4):  
+        posttext=req.delete(url,headers=headers)
+        if posttext.status_code < 300:
+             print('secret删除成功')
+             break
 
 def sendTgBot(content):
     headers={
@@ -145,12 +174,10 @@ def sendTgBot(content):
                 print('tg推送失败')
                 raise Senderror('1')
     print('')
-    
-
-    
+     
 #判断是否更新关注
 for i in range(len(up_list)):
-    if up_list[i] in on_list:
+    if up_list[i] in on_list and len(up_list) == len(on_list):
         pass
     else:
         print('关注列表已更新')
@@ -158,12 +185,6 @@ for i in range(len(up_list)):
         for _i in range(len(up_list)):
             on_list[up_list[_i]]=[0,0,0,0,0]
         break
-
-#判断on_list是否存在 
-if on_list == {}:
-    for _i in range(len(up_list)):
-       on_list={}
-       on_list[up_list[_i]]=[0,0,0,0,0]
 
 print("总共url数 "+str(len(up_list))+'\n')
 for i in range(len(up_list)):
@@ -196,7 +217,7 @@ for i in range(len(up_list)):
                 on_list[up_list[i]][2]=0
     else:
         print("    小于")
-    print(on_list[up_list[i]])
+    print('            '+str(on_list[up_list[i]]))
 if broadcasting_list != '':
     getmstoken()
     sendEmail(r'<html><body>Who is broadcasting: <br>'+broadcasting_list+r'</body><html>')
@@ -205,7 +226,12 @@ if broadcasting_list_4bot != '':
 
        
 #上传新的on_list
-encrypted_value=createsecret(getpublickey(),json.dumps(on_list))
-setsecret(encrypted_value)
-
-
+public_key_1=getpublickey()
+encrypted_value=createsecret(public_key_1,json.dumps(on_list))
+setsecret(encrypted_value,r'https://api.github.com/repos/'+gh_repo+r'/actions/secrets/up_on')
+encrypted_value=createsecret(public_key_1,focus_on)
+setsecret(encrypted_value,r'https://api.github.com/repos/'+gh_repo+r'/actions/secrets/focus_up')
+if focus_up_de != '':
+    deSecret(r'https://api.github.com/repos/'+gh_repo+r'/actions/secrets/focus_up_de')
+if focus_up_add != '':
+    deSecret(r'https://api.github.com/repos/'+gh_repo+r'/actions/secrets/focus_up_add')
