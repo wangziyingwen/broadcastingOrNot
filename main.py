@@ -217,7 +217,7 @@ for i in range(len(up_list)):
         elif on_list[up_list[i]][2] > 30:
                 on_list[up_list[i]][2]=0
     else:
-        if on_list[up_list[i]][2] !=0 and on_list[up_list[i]][2]-on_list[up_list[i]][3] != on_list[up_list[i]][4]
+        if on_list[up_list[i]][2] !=0 and on_list[up_list[i]][2]-on_list[up_list[i]][3] != on_list[up_list[i]][4]:
             on_list[up_list[i]][2]=0
         print("    小于")
     print('            '+str(on_list[up_list[i]]))
