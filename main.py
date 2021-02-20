@@ -185,7 +185,7 @@ for i in range(len(up_list)):
         newornot=1
         on_list={}
         for _i in range(len(up_list)):
-            on_list[up_list[_i]]=[0,0,0,0,0]
+            on_list[up_list[_i]]=[0,0,0,0]
         break
 
 print("总共url数 "+str(len(up_list))+'\n')
@@ -212,12 +212,11 @@ for i in range(len(up_list)):
             #一个time_set区间发现on了并且没有发送过邮件，发送邮件
             broadcasting_list=broadcasting_list+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a><br>'
         if on_list[up_list[i]][2] == 10:
-            on_list[up_list[i]][4]=on_list[up_list[i]][2]-on_list[up_list[i]][3]
             broadcasting_list_4bot=broadcasting_list_4bot+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a>'+'\n'            
         elif on_list[up_list[i]][2] > 30:
                 on_list[up_list[i]][2]=0
     else:
-        if on_list[up_list[i]][2] !=0 and on_list[up_list[i]][2]-on_list[up_list[i]][3] != on_list[up_list[i]][4]:
+        if on_list[up_list[i]][2] !=0:
             on_list[up_list[i]][2]=0
         print("    小于")
     print('            '+str(on_list[up_list[i]]))
