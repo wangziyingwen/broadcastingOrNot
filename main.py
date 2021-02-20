@@ -30,7 +30,7 @@ Auth=r'token '+gh_token
 geturl=r'https://api.github.com/repos/'+gh_repo+r'/actions/secrets/public-key'
 puturl=r'https://api.github.com/repos/'+gh_repo+r'/actions/secrets/up_on'
 key_id='wangziyingwen'
-
+focus_list='Focus_list: '+'\n'
 class Senderror(Exception):
     def __init__(self, arg):
         self.args = arg
@@ -167,6 +167,7 @@ if on_list == {}:
 
 print("总共url数 "+str(len(up_list))+'\n')
 for i in range(len(up_list)):
+    focus_list=focus_list+up_list[i]+' , '
     contenthtml = req.get(url_header+up_list[i])  
     with open(htmlpath,'wb') as f:
         f.write(contenthtml.content)
@@ -190,7 +191,7 @@ if broadcasting_list != '':
     getmstoken()
     sendEmail(r'<html><body>Who is broadcasting: <br>'+broadcasting_list+r'</body><html>')
 if broadcasting_list_4bot != '':
-    sendTgBot(r'Who is broadcasting: '+'\n'+broadcasting_list_4bot+'\n')
+    sendTgBot(r'Who is broadcasting: '+'\n'+broadcasting_list_4bot+'\n'+focus_list)
 
        
 #上传新的on_list
