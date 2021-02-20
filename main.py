@@ -25,12 +25,12 @@ htmlpath=sys.path[0]+r'/1.txt'
 up_list=focus_up.split(',')
 focus_up_add=os.getenv('FOCUS_UP_ADD').split(',')
 focus_up_de=os.getenv('FOCUS_UP_DE').split(',')
-if focus_up_add != '':
+if focus_up_add != ['']:
     for i in range(len(focus_up_add)):
         up_list.append(focus_up_add[i])
         focus_up=focus_up+','+focus_up_add[i]
         print('添加成功')
-if focus_up_de != '':
+if focus_up_de != ['']:
     focus_up_1=''    
     for i in range(len(focus_up_de)):
         if focus_up_de[i] in up_list:
