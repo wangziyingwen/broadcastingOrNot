@@ -156,14 +156,14 @@ for i in range(len(up_list)):
         print('关注列表已更新')
         on_list={}
         for _i in range(len(up_list)):
-            on_list[up_list[_i]]=[0,0]
+            on_list[up_list[_i]]=[0,0,0,0]
         break
 
 #判断on_list是否存在 
 if on_list == {}:
     for _i in range(len(up_list)):
        on_list={}
-       on_list[up_list[_i]]=[0,0]
+       on_list[up_list[_i]]=[0,0,0,0]
 
 print("总共url数 "+str(len(up_list))+'\n')
 for i in range(len(up_list)):
@@ -177,14 +177,22 @@ for i in range(len(up_list)):
     if on_list[up_list[i]][1] >= int(time_set):
         on_list[up_list[i]][0] = 0
         on_list[up_list[i]][1] = 0
+        on_list[up_list[i]][2] = 0
+        on_list[up_list[i]][3] = 0
         #每隔一个time_set清空一次数据
     if int(htmlsize) > 180000 :
+        on_list[up_list[i]][0]=on_list[up_list[i]][0]+10
+        on_list[up_list[i]][2]=on_list[up_list[i]][2]+10
         print("    大于")
-        broadcasting_list_4bot=broadcasting_list_4bot+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a>'+'\n'
-        if on_list[up_list[i]][0] == 0:
-            on_list[up_list[i]][0]=on_list[up_list[i]][0]+1
+        if on_list[up_list[i]][0] == 10:
             #一个time_set区间发现on了并且没有发送过邮件，发送邮件
             broadcasting_list=broadcasting_list+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a><br>'
+        if on_list[up_list[i]][2] == 10:
+            on_list[up_list[i]][3]=on_list[up_list[i]][1]-on_list[up_list[i]][2]
+            broadcasting_list_4bot=broadcasting_list_4bot+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a>'+'\n'            
+        else:
+            if on_list[up_list[i]][1]-on_list[up_list[i]][2] != on_list[up_list[i]][3]:
+                on_list[up_list[i]][2]=0       
     else:
         print("    小于")
 if broadcasting_list != '':
