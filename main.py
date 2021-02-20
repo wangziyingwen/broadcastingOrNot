@@ -1,0 +1,200 @@
+# -*- coding: UTF-8 -*-
+import os
+import requests as req
+import json,sys,random
+from base64 import b64encode
+from nacl import encoding, public
+
+
+url_header=os.getenv('URL_HEADER')
+gh_token=os.getenv('GH_TOKEN')
+tg_bot=os.getenv('TGBOT').split(',')
+tg_token=tg_bot[0]
+chat_id=tg_bot[1]
+up_on=os.getenv('UP_ON')
+if up_on == '':
+    up_on = r'{}'
+on_list=json.loads(up_on)
+gh_repo=os.getenv('GH_REPO')
+ms_token=os.getenv('MS_TOKEN')
+client_id=os.getenv('CLIENT_ID')
+client_secret=os.getenv('CLIENT_SECRET')
+focus_up=os.getenv('FOCUS_UP')
+emailaddress=os.getenv('EMAIL')
+time_set=os.getenv('TIME_SET')
+htmlpath=sys.path[0]+r'/1.txt'
+up_list=focus_up.split(',')
+broadcasting_list=''
+broadcasting_list_4bot=''
+Auth=r'token '+gh_token
+geturl=r'https://api.github.com/repos/'+gh_repo+r'/actions/secrets/public-key'
+puturl=r'https://api.github.com/repos/'+gh_repo+r'/actions/secrets/up_on'
+key_id='wangziyingwen'
+
+class Senderror(Exception):
+    def __init__(self, arg):
+        self.args = arg
+
+def getmstoken():
+    headers={
+            'Content-Type':'application/x-www-form-urlencoded'
+            }
+    data={
+         'grant_type': 'refresh_token',
+         'refresh_token': ms_token,
+         'client_id':client_id,
+         'client_secret':client_secret,
+         'redirect_uri':r'https://login.microsoftonline.com/common/oauth2/nativeclient',
+         }
+    for retry_ in range(4):
+        html = req.post('https://login.microsoftonline.com/common/oauth2/v2.0/token',data=data,headers=headers)
+        if html.status_code < 300:
+            print(r'微软密钥获取成功')
+            break
+        else:
+            if retry_ == 3:
+                print(r'微软密钥获取失败')
+    jsontxt = json.loads(html.text)       
+    return jsontxt['access_token']
+    
+def sendEmail(content):
+    headers={
+            'Authorization': 'bearer ' + getmstoken(),
+            'Content-Type': 'application/json'
+            }
+    mailmessage={
+                'message':{
+                          'subject': 'Broadcasting',
+                          'body': {'contentType': 'HTML', 'content': content},
+                          'toRecipients': [{'emailAddress': {'address': emailaddress}}],
+                          },
+                'saveToSentItems': 'true',
+                }
+    for retry_ in range(4):  
+        posttext=req.post(r'https://graph.microsoft.com/v1.0/me/sendMail',headers=headers,data=json.dumps(mailmessage))
+        if posttext.status_code < 300:
+            print('邮件发送成功')
+            break
+        else:
+            if retry_ == 3:
+                print('邮件发送失败')
+                raise Senderror('1')
+    print('')
+
+def getpublickey():
+    #try:except?
+    headers={
+            'Accept': 'application/vnd.github.v3+json','Authorization': Auth
+            }
+    for retry_ in range(4):
+        html = req.get(geturl,headers=headers)
+        if html.status_code < 300:
+            print("公钥获取成功")
+            break
+        else:
+            if retry_ == 3:
+                print("公钥获取失败，请检查secret里 GH_TOKEN 格式与设置是否正确")
+    jsontxt = json.loads(html.text)
+    public_key = jsontxt['key']
+    global key_id 
+    key_id = jsontxt['key_id']
+    return public_key
+
+def createsecret(public_key,secret_value):
+    public_key = public.PublicKey(public_key.encode("utf-8"), encoding.Base64Encoder())
+    sealed_box = public.SealedBox(public_key)
+    encrypted = sealed_box.encrypt(secret_value.encode("utf-8"))
+    return b64encode(encrypted).decode("utf-8")
+
+def setsecret(encrypted_value):
+    headers={
+            'Accept': 'application/vnd.github.v3+json',
+            'Authorization': Auth
+            }
+    data={
+         'encrypted_value': encrypted_value,
+         'key_id': key_id
+         }
+    #data_str=r'{"encrypted_value":"'+encrypted_value+r'",'+r'"key_id":"'+key_id+r'"}'
+    for retry_ in range(4):
+        putstatus=req.put(puturl,headers=headers,data=json.dumps(data))
+        if putstatus.status_code < 300:
+            print(r'secret上传成功')
+            break
+        else:
+            if retry_ == 3:
+                print(r'secret上传失败')        
+    return putstatus
+
+def sendTgBot(content):
+    headers={
+            'Content-Type': 'application/json'
+            }
+    data={
+         'chat_id':chat_id,
+         'text':content,
+         'parse_mode':'HTML'
+         }  
+    for retry_ in range(4):  
+        posttext=req.post(r'https://api.telegram.org/bot'+tg_token+r'/sendMessage',headers=headers,data=json.dumps(data))
+        if posttext.status_code < 300:
+             print('tg推送成功')
+             break
+        else:
+            if retry_ == 3:
+                print('tg推送失败')
+                raise Senderror('1')
+    print('')
+    
+
+    
+#判断是否更新关注
+for i in range(len(up_list)):
+    if up_list[i] in on_list:
+        pass
+    else:
+        print('关注列表已更新')
+        on_list={}
+        for _i in range(len(up_list)):
+            on_list[up_list[_i]]=[0,0]
+        break
+
+#判断on_list是否存在 
+if on_list == {}:
+    for _i in range(len(up_list)):
+       on_list={}
+       on_list[up_list[_i]]=[0,0]
+
+print("总共url数 "+str(len(up_list))+'\n')
+for i in range(len(up_list)):
+    contenthtml = req.get(url_header+up_list[i])  
+    with open(htmlpath,'wb') as f:
+        f.write(contenthtml.content)
+    htmlsize=os.path.getsize(htmlpath)
+    print(str(i)+" 文件大小："+str(htmlsize))
+    on_list[up_list[i]][1]=on_list[up_list[i]][1]+15
+    if on_list[up_list[i]][1] > int(time_set):
+        on_list[up_list[i]][0] = 0
+        on_list[up_list[i]][1] = 0
+        #每隔一个time_set清空一次数据
+    if int(htmlsize) > 180000 :
+        print("    大于")
+        broadcasting_list_4bot=broadcasting_list_4bot+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a>'+'\n'
+        if on_list[up_list[i]][0] == 0:
+            on_list[up_list[i]][0]=on_list[up_list[i]][0]+1
+            #一个time_set区间发现on了并且没有发送过邮件，发送邮件
+            broadcasting_list=broadcasting_list+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a><br>'
+    else:
+        print("    小于")
+if broadcasting_list != '':
+    getmstoken()
+    sendEmail(r'<html><body>Who is broadcasting: <br>'+broadcasting_list+r'</body><html>')
+if broadcasting_list_4bot != '':
+    sendTgBot(r'Who is broadcasting: '+'\n'+broadcasting_list_4bot+'\n')
+
+       
+#上传新的on_list
+encrypted_value=createsecret(getpublickey(),json.dumps(on_list))
+setsecret(encrypted_value)
+
+

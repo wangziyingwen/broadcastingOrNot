@@ -1,0 +1,41 @@
+name: Monitor
+
+on: 
+  release:
+    types: [published]
+  push:
+    tags:
+    - 'v*'
+  #  branches: 
+  #    - master
+  schedule:
+    - cron: '*/15 * * * *'
+  watch:
+    types: [started]
+   
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id  # 自己点的 start
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+    - name: Install requests #安装模块
+      run: |
+        pip install requests
+        pip install PyNaCl
+    - name: run
+      env:
+        MS_TOKEN: ${{ secrets.MS_TOKEN }} 
+        CLIENT_ID: ${{ secrets.CLIENT_ID }}
+        CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+        FOCUS_UP: ${{ secrets.FOCUS_UP }}
+        EMAIL: ${{ secrets.EMAIL }}
+        GH_TOKEN: ${{ secrets.GH_TOKEN }} 
+        GH_REPO: ${{ github.repository }}
+        TGBOT: ${{ secrets.TGBOT }}        
+        UP_ON: ${{ secrets.UP_ON }}
+        URL_HEADER: ${{ secrets.URL_HEADER }}
+        TIME_SET: ${{ secrets.TIME_SET }}
+      run: |
+        python main.py
