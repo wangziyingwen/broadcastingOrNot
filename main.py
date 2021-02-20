@@ -214,14 +214,14 @@ for i in range(len(up_list)):
         if on_list[up_list[i]][2] == 10:
             on_list[up_list[i]][4]=on_list[up_list[i]][2]-on_list[up_list[i]][3]
             broadcasting_list_4bot=broadcasting_list_4bot+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a>'+'\n'            
-        else:
-            if on_list[up_list[i]][2]-on_list[up_list[i]][3] != on_list[up_list[i]][4] or on_list[up_list[i]][2] > 30:
+        elif on_list[up_list[i]][2] > 30:
                 on_list[up_list[i]][2]=0
     else:
+        if on_list[up_list[i]][2] !=0 and on_list[up_list[i]][2]-on_list[up_list[i]][3] != on_list[up_list[i]][4]
+            on_list[up_list[i]][2]=0
         print("    小于")
     print('            '+str(on_list[up_list[i]]))
 if broadcasting_list != '':
-    getmstoken()
     sendEmail(r'<html><body>Who is broadcasting: <br>'+broadcasting_list+r'</body><html>')
 if broadcasting_list_4bot != '':
     sendTgBot(r'Who is broadcasting: '+'\n'+broadcasting_list_4bot+'\n'+focus_list)
