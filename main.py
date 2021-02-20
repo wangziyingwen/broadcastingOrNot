@@ -176,6 +176,7 @@ def sendTgBot(content):
     print('')
      
 #判断是否更新关注
+newornot = 0
 for i in range(len(up_list)):
     if up_list[i] in on_list and len(up_list) == len(on_list):
         pass
@@ -230,7 +231,7 @@ if broadcasting_list_4bot != '':
 public_key_1=getpublickey()
 encrypted_value=createsecret(public_key_1,json.dumps(on_list))
 setsecret(encrypted_value,r'https://api.github.com/repos/'+gh_repo+r'/actions/secrets/up_on')
-if newornot==1:
+if newornot == 1:
     encrypted_value=createsecret(public_key_1,focus_up)
     setsecret(encrypted_value,r'https://api.github.com/repos/'+gh_repo+r'/actions/secrets/focus_up')
 if focus_up_de != '':
