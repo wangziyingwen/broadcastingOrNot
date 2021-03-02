@@ -237,4 +237,3 @@ if focus_up_de != '':
     deSecret(r'https://api.github.com/repos/'+gh_repo+r'/actions/secrets/focus_up_de')
 if focus_up_add != '':
     deSecret(r'https://api.github.com/repos/'+gh_repo+r'/actions/secrets/focus_up_add')
-print(focus_list)
