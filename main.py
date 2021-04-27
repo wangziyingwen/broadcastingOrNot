@@ -192,10 +192,12 @@ print("总共url数 "+str(len(up_list))+'\n')
 for i in range(len(up_list)):
     focus_list=focus_list+up_list[i]+' , '
     contenthtml = req.get(url_header+up_list[i])  
-    with open(htmlpath,'wb') as f:
-        f.write(contenthtml.content)
-    htmlsize=os.path.getsize(htmlpath)
-    print(str(i)+" 文件大小："+str(htmlsize))
+    #更新导致比较文件大小失效，采用新方法：匹配字符串
+#    with open(htmlpath,'wb') as f:
+#        f.write(contenthtml.content)
+#    htmlsize=os.path.getsize(htmlpath)
+#    print(str(i)+" 文件大小："+str(htmlsize))
+    print("第   "+str(i)+"   号")
     on_list[up_list[i]][1]=on_list[up_list[i]][1]+10
     on_list[up_list[i]][3]=on_list[up_list[i]][3]+10
     if on_list[up_list[i]][1] >= int(time_set):
@@ -204,10 +206,12 @@ for i in range(len(up_list)):
     if on_list[up_list[i]][3] >= int(time_set)*3:
         on_list[up_list[i]][3] = 0
         #每隔一个time_set清空一次数据
-    if int(htmlsize) > 180000 :
+#    if int(htmlsize) > 180000 :
+    if 'online' in contenthtml.text or 'offline' not in contenthtml.text :
         on_list[up_list[i]][0]=on_list[up_list[i]][0]+10
         on_list[up_list[i]][2]=on_list[up_list[i]][2]+10
-        print("    大于")
+#        print("    大于")
+        print("        on")
         if on_list[up_list[i]][0] == 10:
             #一个time_set区间发现on了并且没有发送过邮件，发送邮件
             broadcasting_list=broadcasting_list+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a><br>'
@@ -218,7 +222,8 @@ for i in range(len(up_list)):
     else:
         if on_list[up_list[i]][2] !=0:
             on_list[up_list[i]][2]=0
-        print("    小于")
+#        print("    小于")
+        print("        off")
     print('            '+str(on_list[up_list[i]]))
 if broadcasting_list != '':
     sendEmail(r'<html><body>Who is broadcasting: <br>'+broadcasting_list+r'</body><html>')
