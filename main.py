@@ -192,8 +192,8 @@ print("总共url数 "+str(len(up_list))+'\n')
 for i in range(len(up_list)):
     focus_list=focus_list+up_list[i]+' , '
     #获取信息
-    upInfo_response = json.loads(req.get(url_header+r'rest/v1.0/search/performer/'+up_list[i]).test)
-    streamInfo_response = json.loads(req.get(url_header+r'rest/v1.0/profile/'+up_list[i]+r'/streamInfo').test)
+    upInfo_response = json.loads(req.get(url_header+r'rest/v1.0/search/performer/'+up_list[i]).text)
+    streamInfo_response = json.loads(req.get(url_header+r'rest/v1.0/profile/'+up_list[i]+r'/streamInfo').text)
     print(up_list[i][0:2]+'***'+up_list[i][-1]+'   :')
     on_list[up_list[i]][1]=on_list[up_list[i]][1]+10
     on_list[up_list[i]][3]=on_list[up_list[i]][3]+10
