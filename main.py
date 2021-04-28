@@ -199,7 +199,7 @@ for i in range(len(up_list)):
         break
     for retry_ in range(4):
         streamInfo_raw = req.get(url_header+r'rest/v1.0/profile/'+up_list[i]+r'/streamInfo')
-        if streamInfo_raw < 300:
+        if streamInfo_raw.status_code < 300:
             streamInfo_response = json.loads(req.get(url_header+r'rest/v1.0/profile/'+up_list[i]+r'/streamInfo').text)
             break
     print(up_list[i][0:2]+'***'+up_list[i][-1]+'   :')
