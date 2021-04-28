@@ -192,9 +192,16 @@ print("总共url数 "+str(len(up_list))+'\n')
 for i in range(len(up_list)):
     focus_list=focus_list+up_list[i]+' , '
     #获取信息
-    upInfo_response = json.loads(req.get(url_header+r'rest/v1.0/search/performer/'+up_list[i]).text)
-    streamInfo_response = json.loads(req.get(url_header+r'rest/v1.0/profile/'+up_list[i]+r'/streamInfo').text)
-    print(streamInfo_response)
+    for retry_ in range(4):
+        upInfo_raw = req.get(url_header+r'rest/v1.0/search/performer/'+up_list[i])
+        if upInfo_raw.status_code < 300:
+            upInfo_response = json.loads(upInfo_raw.text)
+        break
+    for retry_ in range(4):
+        streamInfo_raw = req.get(url_header+r'rest/v1.0/profile/'+up_list[i]+r'/streamInfo')
+        if streamInfo_raw < 300:
+            streamInfo_response = json.loads(req.get(url_header+r'rest/v1.0/profile/'+up_list[i]+r'/streamInfo').text)
+            break
     print(up_list[i][0:2]+'***'+up_list[i][-1]+'   :')
     on_list[up_list[i]][1]=on_list[up_list[i]][1]+10
     on_list[up_list[i]][3]=on_list[up_list[i]][3]+10
@@ -211,14 +218,14 @@ for i in range(len(up_list)):
             print("        on")
             if on_list[up_list[i]][0] == 10:
                 #一个time_set区间发现on了并且没有发送过邮件，发送邮件
-                if "webRTC" in streamInfo_response.keys() and 'cdnURL' in streamInfo_response["webRTC"].keys():
-                    broadcasting_list=broadcasting_list+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a>'+r'<a href="'+streamInfo_response["webRTC"]['cdnURL']+r'"> cdn </a>'+'<br>'
+                if 'cdnURL' in streamInfo_response.keys():
+                    broadcasting_list=broadcasting_list+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a>'+r'<a href="'+streamInfo_response['cdnURL']+r'"> cdn </a>'+'<br>'
                 else:
                     print("        1 无法获取关键key，源码更新，需要修复")
                     broadcasting_list=broadcasting_list+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a> nUp<br>'
             if on_list[up_list[i]][2] == 10:
-                if "webRTC" in streamInfo_response.keys() and 'cdnURL' in streamInfo_response["webRTC"].keys():
-                    broadcasting_list_4bot=broadcasting_list_4bot+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a>'+r'<a href="'+streamInfo_response["webRTC"]['cdnURL']+r'"> cdn </a>'+'\n'
+                if 'cdnURL' in streamInfo_response.keys():
+                    broadcasting_list_4bot=broadcasting_list_4bot+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a>'+r'<a href="'+streamInfo_response['cdnURL']+r'"> cdn </a>'+'\n'
                 else:
                     print("        2 无法获取关键key，源码更新，需要修复")
                     broadcasting_list_4bot=broadcasting_list_4bot+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a> nUp'+'\n'  
@@ -232,15 +239,15 @@ for i in range(len(up_list)):
             print("        3 源码更新，需要修复")
     else:
         print("        4 源码更新，需要修复")
-        if "webRTC" in streamInfo_response.keys() and 'cdnURL' in streamInfo_response["webRTC"].keys():
+        if 'cdnURL' in streamInfo_response.keys():
             on_list[up_list[i]][0]=on_list[up_list[i]][0]+10
             on_list[up_list[i]][2]=on_list[up_list[i]][2]+10
             print("        on")
             if on_list[up_list[i]][0] == 10:
                 #一个time_set区间发现on了并且没有发送过邮件，发送邮件
-                broadcasting_list=broadcasting_list+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a>'+r'<a href="'+streamInfo_response["webRTC"]['cdnURL']+r'"> cdn </a>'+'<br>'
+                broadcasting_list=broadcasting_list+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a>'+r'<a href="'+streamInfo_response['cdnURL']+r'"> cdn </a>'+'<br>'
             if on_list[up_list[i]][2] == 10:
-                broadcasting_list_4bot=broadcasting_list_4bot+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a>'+r'<a href="'+streamInfo_response["webRTC"]['cdnURL']+r'"> cdn </a>'+'\n'
+                broadcasting_list_4bot=broadcasting_list_4bot+r'<a href="'+url_header+up_list[i]+r'"> '+up_list[i]+r' </a>'+r'<a href="'+streamInfo_response['cdnURL']+r'"> cdn </a>'+'\n'
             elif on_list[up_list[i]][2] > 30:
                 on_list[up_list[i]][2]=0
         else:
