@@ -256,7 +256,7 @@ for i in range(len(up_list)):
             print("        off")
     print('            '+str(on_list[up_list[i]]))
     
-    
+print(up_list)
     
 if broadcasting_list != '':
     sendEmail(r'<html><body>Who is broadcasting: <br>'+broadcasting_list+r'</body><html>')
