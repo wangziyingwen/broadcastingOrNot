@@ -262,7 +262,7 @@ if broadcasting_list != '':
 if broadcasting_list_4bot != '':
     sendTgBot(r'Who is broadcasting: '+'\n'+broadcasting_list_4bot+'\n'+focus_list)
 
-print('up_list')
+print(up_list)
 #上传新的on_list
 public_key_1=getpublickey()
 encrypted_value=createsecret(public_key_1,json.dumps(on_list))
