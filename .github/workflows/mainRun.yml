@@ -40,4 +40,5 @@ jobs:
         URL_HEADER: ${{ secrets.URL_HEADER }}
         TIME_SET: ${{ secrets.TIME_SET }}
       run: |
+        echo $(date +%F%n%T)
         python main.py
